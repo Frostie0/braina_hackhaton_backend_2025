@@ -1,5 +1,5 @@
 import express from 'express';
-import { getQuizController } from '../controllers/quizControllers.js';
+import { getQuizController, getAllQuizUserController, createQuizController } from '../controllers/quizControllers.js';
 
 
 const router = express.Router();
@@ -9,5 +9,9 @@ const router = express.Router();
 // router.post('/login', loginController);
 
 router.get('/getQuiz/:quizId', getQuizController);
+
+router.get('/getAllQuizByUser/:userId', getAllQuizUserController);
+
+router.post('/create', createQuizController);
 
 export default router
