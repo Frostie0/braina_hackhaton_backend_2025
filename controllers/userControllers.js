@@ -1,6 +1,18 @@
 import { User } from "../models/User.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'secret_key_braina_2025', {
+        expiresIn: '30d',
+    });
+};
+
+const generateRefreshToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || 'refresh_secret_key_braina_2025', {
+        expiresIn: '60d',
+    });
+};
 
 export const registerController = async (req, res) => {
     try {
@@ -24,9 +36,13 @@ export const registerController = async (req, res) => {
             password: hashedPassword
         });
 
+        const access_token = generateToken(newUser._id);
+        const refresh_token = generateRefreshToken(newUser._id);
 
         res.status(200).json({
             newUser,
+            access_token,
+            refresh_token
         });
 
     } catch (error) {
@@ -38,6 +54,9 @@ export const registerController = async (req, res) => {
 export const loginController = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        console.log("Email:", email);
+        console.log("Password:", password);
 
         const user = await User.findOne({ email });
 
@@ -51,8 +70,13 @@ export const loginController = async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
+        const access_token = generateToken(user._id);
+        const refresh_token = generateRefreshToken(user._id);
+
         res.status(200).json({
             user,
+            access_token,
+            refresh_token
         });
 
     } catch (error) {
@@ -84,3 +108,14 @@ export const getUserController = async (req, res) => {
     }
 };
 
+export const getMeController = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        res.status(200).json({
+            data: user
+        });
+    } catch (error) {
+        console.error("Erreur:", error);
+        res.status(500).json({ error: error.message });
+    }
+};

@@ -28,6 +28,7 @@ app.use(cookieParser());
 // Import des routes
 import userRoutes from './routes/userRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
+import gameRoomRoutes from './routes/gameRoomRoutes.js';
 
 //home
 app.get("/", (req, res) => {
@@ -44,6 +45,7 @@ app.get('/ping', (req, res) => {
 // Routes API
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/quiz", quizRoutes);
+app.use("/api/v1/game", gameRoomRoutes);
 
 // Créer un serveur HTTP à partir de l'application Express
 const server = http.createServer(app);
