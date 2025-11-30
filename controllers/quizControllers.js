@@ -23,7 +23,8 @@ export const getAllQuizUserController = async (req, res) => {
 export const getQuizController = async (req, res) => {
     try {
         const { quizId } = req.params;
-        const quiz = await Quiz.findOne({ quizId });
+
+        const quiz = await Quiz.findOne({ quizId: quizId });
 
 
         if (!quiz) {
@@ -174,6 +175,38 @@ export const deleteQuizController = async (req, res) => {
         res.status(200).json({
             message: 'Quiz deleted successfully',
         });
+
+    } catch (error) {
+        console.error("Erreur:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const incrementPlayedCountController = async (req, res) => {
+    try {
+        const { quizId, userId } = req.body;
+
+        if (!quizId || !userId) {
+            return res.status(400).json({ error: 'quizId and userId are required' });
+        }
+
+        const quiz = await Quiz.findOne({ quizId });
+
+        if (!quiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+
+        const playerIndex = quiz.players.findIndex(p => p.id === userId);
+
+        if (playerIndex !== -1) {
+            quiz.players[playerIndex].played += 1;
+        } else {
+            quiz.players.push({ id: userId, played: 1 });
+        }
+
+        await quiz.save();
+
+        res.status(200).json({ message: 'Played count incremented successfully', quiz });
 
     } catch (error) {
         console.error("Erreur:", error);

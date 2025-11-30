@@ -29,6 +29,7 @@ app.use(cookieParser());
 import userRoutes from './routes/userRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import gameRoomRoutes from './routes/gameRoomRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 //home
 app.get("/", (req, res) => {
@@ -46,6 +47,7 @@ app.get('/ping', (req, res) => {
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/game", gameRoomRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
 
 // Créer un serveur HTTP à partir de l'application Express
 const server = http.createServer(app);

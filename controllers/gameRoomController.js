@@ -32,7 +32,7 @@ const checkAnswer = (userAnswer, correctAnswer) => {
 
 export const createGame = async (req, res) => {
     try {
-        const { hostId, settings, questions } = req.body;
+        const { hostId, settings, questions, quizId } = req.body;
         let gameCode = generateGameCode();
 
         // Ensure uniqueness (simple check)
@@ -45,6 +45,7 @@ export const createGame = async (req, res) => {
         const newGame = new GameRoom({
             gameCode,
             hostId,
+            quizId: quizId || '',
             settings,
             questions,
             gameState: 'waiting',

@@ -62,7 +62,11 @@ const gameRoomSchema = new mongoose.Schema({
     gameCode: {
         type: String,
         required: true,
-        // unique: true, // Removed to avoid duplicate index
+        unique: true, // Removed to avoid duplicate index
+    },
+    quizId: {
+        type: String,
+        default: '',
     },
     hostId: {
         type: String,
