@@ -30,6 +30,7 @@ import userRoutes from './routes/userRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import gameRoomRoutes from './routes/gameRoomRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import examRoutes from './routes/examRoutes.js';
 
 //home
 app.get("/", (req, res) => {
@@ -48,6 +49,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/game", gameRoomRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/exam", examRoutes);
 
 // Créer un serveur HTTP à partir de l'application Express
 const server = http.createServer(app);
