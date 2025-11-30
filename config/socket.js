@@ -99,8 +99,15 @@ const initSocket = (server) => {
         // Un joueur rejoint une room et reçoit/partage l'état
         socket.on('join_game', ({ gameCode, userId, userName, timePerTurn, isHost }) => {
             if (!gameCode || !userId) return;
+
+            console.log(`🔵 [JOIN_GAME] User ${userId} (${userName}) joining room ${gameCode} (isHost: ${isHost})`);
+
             const room = getRoom(gameCode);
             socket.join(gameCode);
+
+            // Vérifier que le socket a bien rejoint la room
+            const socketRooms = Array.from(socket.rooms);
+            console.log(`🔵 [JOIN_GAME] Socket ${socket.id} rooms:`, socketRooms);
 
             // Attribuer un symbole si disponible
             if (!room.symbols[userId]) {
@@ -108,6 +115,9 @@ const initSocket = (server) => {
                 if (!used.includes('X')) room.symbols[userId] = 'X';
                 else if (!used.includes('O')) room.symbols[userId] = 'O';
                 // sinon: spectateur (pas de symbole)
+                console.log(`🔵 [JOIN_GAME] Assigned symbol ${room.symbols[userId]} to ${userId}`);
+            } else {
+                console.log(`🔵 [JOIN_GAME] User ${userId} already has symbol ${room.symbols[userId]}`);
             }
 
             // Configurer la durée de tour si fournie
@@ -122,6 +132,8 @@ const initSocket = (server) => {
                 isHost: !!isHost,
                 isConnected: true,
             };
+
+            console.log(`🔵 [JOIN_GAME] Room ${gameCode} now has ${Object.keys(room.users).length} users:`, Object.keys(room.users));
 
             emitState(io, gameCode);
             // Démarrer ou redémarrer le timer à l'arrivée d'un joueur
@@ -220,6 +232,40 @@ const initSocket = (server) => {
             s.turnStart = Date.now();
             emitState(io, gameCode);
             startTurnTimer(gameCode);
+        });
+
+        // Un joueur quitte explicitement une room
+        socket.on('leave_game', ({ gameCode, userId }) => {
+            if (!gameCode || !userId) return;
+            console.log(`🔴 [LEAVE_GAME] User ${userId} leaving room ${gameCode}`);
+            const s = rooms.get(gameCode);
+            if (!s) return;
+
+            if (s.users[userId]) {
+                s.users[userId].isConnected = false;
+                emitWaiting(io, gameCode);
+            }
+
+            socket.leave(gameCode);
+        });
+
+        // Gestion de la déconnexion du socket
+        socket.on('disconnect', () => {
+            console.log(`🔴 [DISCONNECT] Socket ${socket.id} disconnected`);
+
+            // Trouver toutes les rooms auxquelles ce socket appartenait
+            rooms.forEach((room, gameCode) => {
+                // Trouver l'userId correspondant à ce socketId
+                const userId = Object.keys(room.users).find(
+                    uid => room.users[uid].socketId === socket.id
+                );
+
+                if (userId && room.users[userId]) {
+                    console.log(`🔴 [DISCONNECT] Marking user ${userId} as disconnected in room ${gameCode}`);
+                    room.users[userId].isConnected = false;
+                    emitWaiting(io, gameCode);
+                }
+            });
         });
     });
 
